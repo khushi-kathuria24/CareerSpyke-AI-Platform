@@ -72,11 +72,41 @@ app.use('/api/interview', interviewRoutes);
 app.use('/api/aws', awsRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  let db_status = 'Disconnected';
+  let db_error = null;
+
+  try {
+    if (process.env.RDS_HOSTNAME) {
+      // For Postgres, check if we can query some table
+      await db.query('SELECT 1');
+      db_status = 'Connected (PostgreSQL)';
+    } else {
+      // For SQLite, check if we can query
+      await new Promise((resolve, reject) => {
+        db.get('SELECT 1', (err) => (err ? reject(err) : resolve()));
+      });
+      db_status = 'Connected (SQLite)';
+    }
+  } catch (err) {
+    db_status = 'Error';
+    db_error = err.message;
+    console.error('Health Check DB Error:', err);
+  }
+
   res.json({
     status: 'Server is running',
-    database: process.env.RDS_HOSTNAME ? 'PostgreSQL (RDS)' : 'SQLite',
-    environment: process.env.NODE_ENV || 'development'
+    database: db_status,
+    db_error: db_error,
+    environment: process.env.NODE_ENV || 'development',
+    google_keys: {
+      client_id: !!process.env.GOOGLE_CLIENT_ID || !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      client_secret: !!process.env.GOOGLE_CLIENT_SECRET
+    },
+    aws_keys: {
+      s3_bucket: !!process.env.AWS_S3_BUCKET_NAME,
+      access_key: !!process.env.AWS_ACCESS_KEY_ID
+    }
   });
 });
 
