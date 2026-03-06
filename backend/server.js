@@ -62,6 +62,11 @@ const communityRoutes = require('./routes/community');
 const interviewRoutes = require('./routes/interview');
 const awsRoutes = require('./routes/aws');
 
+// Root route
+app.get('/', (req, res) => {
+  res.send('🚀 CareerSpyke API is running! Visit /api/health for system status.');
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
