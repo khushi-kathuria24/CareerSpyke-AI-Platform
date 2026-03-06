@@ -2,8 +2,9 @@
 import { useState } from 'react'
 import DashboardCard from '../../components/DashboardCard'
 import ChatBox from '@/components/ChatBox'
+import axios from 'axios'
 
-export default function Dashboard(){
+export default function Dashboard() {
   const [openChat, setOpenChat] = useState(false)
   const [expandedChat, setExpandedChat] = useState(false)
   const [selectedDialog, setSelectedDialog] = useState(null)
@@ -31,7 +32,7 @@ export default function Dashboard(){
     { code: 'CHEM102', name: 'Chemistry' },
     { code: 'BIO103', name: 'Bioinformatics' }
   ]
-  
+
   // Interview history data
   const interviewHistory = {
     ai: [
@@ -57,13 +58,13 @@ export default function Dashboard(){
   const skillsList = ['Python Programming', 'SQL', 'MongoDB', 'MATLAB', 'Machine Learning', 'SRE', 'Docker', 'AWS', 'JavaScript', 'React', 'Node.js', 'Git']
 
   const toggleCourse = (courseCode) => {
-    setSelectedCourses(prev => 
+    setSelectedCourses(prev =>
       prev.includes(courseCode) ? prev.filter(c => c !== courseCode) : [...prev, courseCode]
     )
   }
 
   const toggleSkill = (skill) => {
-    setSelectedSkills(prev => 
+    setSelectedSkills(prev =>
       prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]
     )
   }
@@ -99,32 +100,61 @@ export default function Dashboard(){
   }
 
   const handleRunCode = async () => {
+    if (!code.trim()) return
     setIsRunning(true)
-    // Simulate code execution - replace with actual backend API call
-    setTimeout(() => {
-      try {
-        if (language === 'javascript') {
-          // For demo purposes, just show a success message
-          setCodeOutput({
-            status: 'success',
-            result: 'Code executed successfully!',
-            message: 'Output will appear here when you add backend compiler API'
-          })
-        }
-      } catch (error) {
-        setCodeOutput({
-          status: 'error',
-          result: 'Error executing code',
-          message: error.message
-        })
-      }
+    setCodeOutput(null)
+
+    try {
+      const res = await axios.post('/api/code-compiler', {
+        code,
+        language,
+        action: 'run'
+      })
+
+      setCodeOutput({
+        status: res.data.status || 'success',
+        result: res.data.result || 'Execution Complete',
+        message: res.data.message
+      })
+    } catch (error) {
+      console.error(error)
+      setCodeOutput({
+        status: 'error',
+        result: 'Compilation Error',
+        message: 'The compilation engine is currently busy. Please try again in a few seconds.'
+      })
+    } finally {
       setIsRunning(false)
-    }, 1000)
+    }
   }
 
-  const handleCheckResult = () => {
-    // This will connect to your backend compiler API
-    alert('Connect to your backend compiler API to check the result')
+  const handleCheckResult = async () => {
+    if (!code.trim()) return
+    setIsRunning(true) // Re-use isRunning for loading state
+    setCodeOutput(null)
+
+    try {
+      const res = await axios.post('/api/code-compiler', {
+        code,
+        language,
+        action: 'check'
+      })
+
+      setCodeOutput({
+        status: res.data.status || 'success',
+        result: res.data.result || 'Analysis Complete',
+        message: res.data.message
+      })
+    } catch (error) {
+      console.error(error)
+      setCodeOutput({
+        status: 'error',
+        result: 'Verification Failed',
+        message: 'Could not connect to the logic verification engine. Please check your internet connection.'
+      })
+    } finally {
+      setIsRunning(false)
+    }
   }
 
   // Dialog overlay
@@ -161,11 +191,11 @@ export default function Dashboard(){
             { icon: '👥', label: 'Connections', value: '4', key: 'connections' },
             { icon: '📊', label: 'Skills', value: savedSkills.length, key: 'skills' },
           ].map((stat, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               onClick={() => setSelectedDialog(stat.key)}
-              className='card-gradient rounded-xl p-6 text-center animate-fadeInUp cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200' 
-              style={{animationDelay: `${idx * 0.1}s`}}
+              className='card-gradient rounded-xl p-6 text-center animate-fadeInUp cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200'
+              style={{ animationDelay: `${idx * 0.1}s` }}
             >
               <div className='text-3xl mb-2'>{stat.icon}</div>
               <p className='text-slate-600 text-sm'>{stat.label}</p>
@@ -183,8 +213,8 @@ export default function Dashboard(){
             <div className='space-y-3'>
               {coursesList.map(course => (
                 <label key={course.code} className='flex items-center p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition-all'>
-                  <input 
-                    type='checkbox' 
+                  <input
+                    type='checkbox'
                     checked={selectedCourses.includes(course.code)}
                     onChange={() => toggleCourse(course.code)}
                     className='w-5 h-5 cursor-pointer'
@@ -201,7 +231,7 @@ export default function Dashboard(){
                   <p className='text-sm text-green-600'>{selectedCourses.join(', ')}</p>
                 </div>
               )}
-              <button 
+              <button
                 onClick={saveCourses}
                 disabled={selectedCourses.length === 0}
                 className='w-full mt-4 p-3 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 text-white font-semibold rounded-lg transition-colors'
@@ -225,11 +255,10 @@ export default function Dashboard(){
                   <button
                     key={option.type}
                     onClick={() => setSelectedInterviewType(option.type)}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      selectedInterviewType === option.type 
-                        ? 'border-orange-500 bg-orange-50' 
+                    className={`p-4 rounded-lg border-2 transition-all ${selectedInterviewType === option.type
+                        ? 'border-orange-500 bg-orange-50'
                         : 'border-slate-200 hover:border-orange-300'
-                    }`}
+                      }`}
                   >
                     <div className='text-2xl mb-2'>{option.title.split(' ')[0]}</div>
                     <p className='font-semibold text-slate-700'>{option.title.split(' ').slice(1).join(' ')}</p>
@@ -294,7 +323,7 @@ export default function Dashboard(){
                 ))}
               </div>
 
-              <button 
+              <button
                 onClick={() => setShowFriendList(true)}
                 className='w-full p-4 border-2 border-dashed border-orange-300 rounded-lg hover:bg-orange-50 transition-colors mt-4'
               >
@@ -355,7 +384,7 @@ export default function Dashboard(){
                 )}
               </div>
 
-              <button 
+              <button
                 onClick={() => setShowFriendList(false)}
                 className='w-full p-3 border-2 border-slate-300 rounded-lg hover:bg-slate-50 text-slate-700 font-semibold transition-colors'
               >
@@ -376,11 +405,10 @@ export default function Dashboard(){
                   <button
                     key={skill}
                     onClick={() => toggleSkill(skill)}
-                    className={`p-3 rounded-lg border-2 font-semibold transition-all ${
-                      selectedSkills.includes(skill)
+                    className={`p-3 rounded-lg border-2 font-semibold transition-all ${selectedSkills.includes(skill)
                         ? 'border-orange-500 bg-orange-50 text-orange-700'
                         : 'border-slate-200 text-slate-700 hover:border-orange-300'
-                    }`}
+                      }`}
                   >
                     {selectedSkills.includes(skill) ? '✓ ' : ''}{skill}
                   </button>
@@ -392,7 +420,7 @@ export default function Dashboard(){
                   <p className='text-sm text-green-600'>{selectedSkills.join(', ')}</p>
                 </div>
               )}
-              <button 
+              <button
                 onClick={saveSkills}
                 disabled={selectedSkills.length === 0}
                 className='w-full mt-4 p-3 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 text-white font-semibold rounded-lg transition-colors'
@@ -405,22 +433,22 @@ export default function Dashboard(){
 
         {/* Main Cards */}
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
-          <DashboardCard 
-            href='/profile' 
+          <DashboardCard
+            href='/profile'
             title='Profile & Resume'
             icon='📄'
           >
             Manage your profile, upload resumes and showcase your achievements
           </DashboardCard>
-          <DashboardCard 
-            href='/community' 
+          <DashboardCard
+            href='/community'
             title='Community'
             icon='💬'
           >
             Connect with peers, join forums, participate in polls and discussions
           </DashboardCard>
-          <DashboardCard 
-            href='/interview' 
+          <DashboardCard
+            href='/interview'
             title='Mock Interviews'
             icon='🎙️'
           >
@@ -432,22 +460,22 @@ export default function Dashboard(){
         <div className='mb-8'>
           <h2 className='text-2xl font-bold text-slate-800 mb-4'>🎓 Learning & Productivity Tools</h2>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-            <DashboardCard 
-              href='/code-explainer' 
+            <DashboardCard
+              href='/code-explainer'
               title='Code Explainer'
               icon='💡'
             >
               Paste any code and get AI-powered explanations with step-by-step breakdown
             </DashboardCard>
-            <DashboardCard 
-              href='/concept-explainer' 
+            <DashboardCard
+              href='/concept-explainer'
               title='Concept Simplifier'
               icon='🎓'
             >
               Break down complex technical concepts into simple, easy-to-understand explanations
             </DashboardCard>
-            <DashboardCard 
-              href='/learning-path' 
+            <DashboardCard
+              href='/learning-path'
               title='Learning Path'
               icon='🗺️'
             >
@@ -458,13 +486,13 @@ export default function Dashboard(){
 
         {/* Chat Widget */}
         <div className='fixed bottom-56 right-6 flex flex-col items-end gap-2 z-40'>
-          <button 
+          <button
             onClick={() => setOpenChat(v => !v)}
             className='text-sm font-semibold text-red-600 hover:text-red-700 transition-colors'
           >
             SAKHA?
           </button>
-          <button 
+          <button
             onClick={() => setOpenChat(v => !v)}
             className='w-16 h-16 rounded-full btn-primary shadow-2xl flex items-center justify-center text-2xl hover:scale-110 transition-transform duration-300 animate-bounce-subtle'
           >
@@ -474,7 +502,7 @@ export default function Dashboard(){
 
         {openChat && (
           <div className='fixed bottom-80 right-6 w-full max-w-md animate-slideInRight'>
-            <ChatBox 
+            <ChatBox
               isExpanded={expandedChat}
               onExpand={() => setExpandedChat(true)}
               onClose={() => { setExpandedChat(false); setOpenChat(false); }}
