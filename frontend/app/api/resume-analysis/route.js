@@ -21,7 +21,7 @@ export async function POST(req) {
     // Determine MIME type based on file extension
     const fileName = file.name.toLowerCase();
     let mimeType = 'application/octet-stream';
-    
+
     if (fileName.endsWith('.pdf')) {
       mimeType = 'application/pdf';
     } else if (fileName.endsWith('.docx')) {
@@ -63,51 +63,64 @@ export async function POST(req) {
 
     // Create context-specific analysis prompts
     let analysisPrompt;
-    
+
     if (isVideo) {
-      analysisPrompt = `You are an expert career coach and presentation consultant. Analyze this video resume/interview/presentation carefully and provide comprehensive feedback in JSON format:
+      analysisPrompt = `You are an expert career coach and presentation consultant. Analyze this video resume/interview/presentation carefully and provide comprehensive feedback in JSON format. Use clear paragraphs and Markdown for the summary and detailedFeedback fields.
 
 {
   "videoScore": <0-100>,
   "speakingScore": <0-100>,
   "technicalScore": <0-100>,
-  "suggestions": [<5+ specific improvements>],
-  "keyStrengths": [<observed strengths>],
-  "gaps": [<areas to improve>],
-  "technicalFeedback": "<feedback on video/audio quality>",
-  "summary": "<overall assessment>"
+  "suggestions": [<5+ specific short improvements>],
+  "keyStrengths": [<top 3 strengths>],
+  "gaps": [<top 3 areas to focused on>],
+  "technicalFeedback": "<short feedback on video/audio quality>",
+  "summary": "<A powerful, encouraging 2-sentence summary using Markdown bolding>",
+  "detailedFeedback": "<A structured analysis in 3-4 short paragraphs using Markdown. Focus on: 1. Visual Presence, 2. Verbal Communication, 3. Content Impact. Use bullet points where appropriate.>",
+  "nextSteps": ["Step 1...", "Step 2...", "Step 3..."]
 }
 
-Evaluate: appearance, confidence, body language, eye contact, speaking clarity, pace, tone, video quality, lighting, background, audio quality, content structure.`;
+Guidelines:
+- Keep it professional and empathetic.
+- Use bullet points in detailedFeedback.
+- Total word count for all text fields must be under 400 words.`;
     } else if (isAudio) {
-      analysisPrompt = `You are an expert career coach specializing in audio presentations. Analyze this audio resume/pitch/interview recording and provide comprehensive feedback in JSON format:
+      analysisPrompt = `You are an expert career coach specializing in audio presentations. Analyze this audio resume/pitch/interview recording and provide comprehensive feedback in JSON format. Use clear paragraphs and Markdown for the summary and detailedFeedback fields.
 
 {
   "speakingScore": <0-100>,
   "audioQualityScore": <0-100>,
-  "suggestions": [<5+ specific improvements>],
-  "keyStrengths": [<strengths>],
-  "gaps": [<areas to improve>],
-  "technicalFeedback": "<audio quality feedback>",
-  "summary": "<overall assessment>"
+  "suggestions": [<5+ specific short improvements>],
+  "keyStrengths": [<recorded strengths>],
+  "gaps": [<areas for improvement>],
+  "technicalFeedback": "<short audio quality feedback>",
+  "summary": "<A powerful, encouraging 2-sentence summary using Markdown bolding>",
+  "detailedFeedback": "<A structured analysis in 3-4 short paragraphs using Markdown. Focus on: 1. Tone & Clarity, 2. Message Structure, 3. Audience Engagement. Use bullet points.>",
+  "nextSteps": ["Step 1...", "Step 2...", "Step 3..."]
 }
 
-Evaluate: clarity, pronunciation, pace, tone, confidence, audio quality, background noise, volume consistency, content structure, professional language.`;
+Guidelines:
+- Keep it professional and empathetic.
+- Total word count for all text fields must be under 400 words.`;
     } else {
-      analysisPrompt = `You are an expert resume consultant. Analyze this resume document and provide comprehensive feedback in JSON format:
+      analysisPrompt = `You are an expert resume consultant. Analyze this resume document and provide comprehensive feedback in JSON format. Use clear paragraphs and Markdown for the summary and detailedFeedback fields.
 
 {
   "score": <0-100>,
-  "suggestions": [<specific improvements>],
-  "skills": [<identified skills>],
-  "strengths": [<key strengths>],
-  "gaps": [<critical gaps>],
   "atsScore": <0-100>,
-  "summary": "<brief assessment>",
-  "detailedFeedback": "<comprehensive feedback>"
+  "summary": "<A powerful, encouraging 2-sentence summary using Markdown bolding>",
+  "detailedFeedback": "<A comprehensive analysis in 4 short paragraphs using Markdown. Focus on: 1. Visual Layout, 2. Content Quality, 3. ATS & Keywords, 4. Achievement Impact. Use bullet points and bolding for key terms.>",
+  "suggestions": [<5-7 specific actionable improvements>],
+  "skills": [<top 10 identified skills>],
+  "strengths": [<top 3 key strengths>],
+  "gaps": [<top 3 critical gaps>],
+  "nextSteps": ["1. Fix [specific thing]...", "2. Add [specific skill]...", "3. Update [section]..."]
 }
 
-Evaluate: formatting, content, ATS optimization, grammar, keywords, achievements, professional presentation.`;
+Guidelines:
+- Keep it professional, detailed but concise.
+- Use bolding for important keywords.
+- Total word count for all text fields must be under 500 words.`;
     }
 
     let result;
@@ -136,7 +149,7 @@ Evaluate: formatting, content, ATS optimization, grammar, keywords, achievements
     }
 
     const responseText = result.response.text();
-    
+
     // Extract JSON from response
     let analysisData;
     try {
@@ -148,7 +161,7 @@ Evaluate: formatting, content, ATS optimization, grammar, keywords, achievements
       }
     } catch (parseError) {
       console.error("JSON Parse Error:", parseError);
-      
+
       // Fallback responses based on file type
       if (isVideo) {
         analysisData = {
