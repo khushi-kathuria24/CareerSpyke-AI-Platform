@@ -1,12 +1,14 @@
-"use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ResumePreview from '../../components/ResumePreview'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import { useRouter } from 'next/navigation'
 
 export default function Community() {
   const [tab, setTab] = useState('faqs')
   const [selectedForum, setSelectedForum] = useState('general')
   const [selectedResume, setSelectedResume] = useState(null)
+  const [inspirationSuccess, setInspirationSuccess] = useState(false)
+  const router = useRouter()
   const [newPost, setNewPost] = useState('')
   const [postImage, setPostImage] = useState(null)
   const [postImagePreview, setPostImagePreview] = useState(null)
@@ -168,6 +170,15 @@ export default function Community() {
       score: 82
     },
   ]
+
+  const handleUseInspiration = () => {
+    setInspirationSuccess(true)
+    setTimeout(() => {
+      setInspirationSuccess(false)
+      setSelectedResume(null)
+      router.push('/upload-resume')
+    }, 2000)
+  }
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
@@ -731,8 +742,16 @@ export default function Community() {
               >
                 Close
               </button>
-              <button className='btn-primary px-8 py-2 rounded-xl font-bold shadow-lg shadow-indigo-200'>
-                Use as Inspiration
+              <button
+                onClick={handleUseInspiration}
+                disabled={inspirationSuccess}
+                className='btn-primary px-8 py-2 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2'
+              >
+                {inspirationSuccess ? (
+                  <><span>✨</span> Template Copied!</>
+                ) : (
+                  <>Use as Inspiration</>
+                )}
               </button>
             </div>
           </div>
