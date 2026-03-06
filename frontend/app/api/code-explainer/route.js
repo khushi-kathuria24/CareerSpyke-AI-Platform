@@ -31,43 +31,44 @@ Format your response as JSON with this structure:
 
 Be clear, concise, and educational. Adjust complexity based on the ${difficulty} level.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `${systemPrompt}\n\nCode to explain:\n\`\`\`${language}\n${code}\n\`\`\``;
 
     const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
+    const responseText = result.response.text();
 
     // Try to parse JSON from response
     let explanation;
     try {
-      // Remove markdown code blocks if present
-      const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      explanation = JSON.parse(cleanText);
+      const jsonStart = responseText.indexOf('{');
+      const jsonEnd = responseText.lastIndexOf('}') + 1;
+      const cleanJSON = responseText.substring(jsonStart, jsonEnd);
+      explanation = JSON.parse(cleanJSON);
     } catch (parseError) {
+      console.error('Code explanation parse error:', parseError, 'Raw:', responseText);
       // If JSON parsing fails, create structured response from text
       explanation = {
-        overview: text.split('\n')[0] || "Code analysis completed",
+        overview: responseText.split('\n')[0] || "Code analysis completed",
         breakdown: [
-          { line: "Full code", explanation: text }
+          { line: "Full code", explanation: responseText }
         ],
         suggestions: ["Review the explanation above for insights"]
       };
     }
 
     return Response.json(
-      { 
+      {
         ...explanation,
-        success: true 
+        success: true
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Code Explainer API Error:", error);
-    
+
     return Response.json(
-      { 
+      {
         error: "Failed to explain code",
         details: error.message,
         success: false
