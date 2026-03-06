@@ -75,18 +75,24 @@ app.use('/api/aws', awsRoutes);
 app.get('/api/health', async (req, res) => {
   let db_status = 'Disconnected';
   let db_error = null;
+  let users_table_exists = false;
 
   try {
     if (process.env.RDS_HOSTNAME) {
-      // For Postgres, check if we can query some table
       await db.query('SELECT 1');
       db_status = 'Connected (PostgreSQL)';
+      // Correction: PostgreSQL query for table existence
+      const checkTable = await db.query("SELECT 1 FROM information_schema.tables WHERE table_name = 'users'");
+      users_table_exists = checkTable.rowCount > 0;
     } else {
-      // For SQLite, check if we can query
       await new Promise((resolve, reject) => {
         db.get('SELECT 1', (err) => (err ? reject(err) : resolve()));
       });
       db_status = 'Connected (SQLite)';
+      const checkTable = await new Promise((resolve) => {
+        db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='users'", (err, row) => resolve(!!row));
+      });
+      users_table_exists = checkTable;
     }
   } catch (err) {
     db_status = 'Error';
@@ -98,14 +104,11 @@ app.get('/api/health', async (req, res) => {
     status: 'Server is running',
     database: db_status,
     db_error: db_error,
-    environment: process.env.NODE_ENV || 'development',
+    users_table_ready: users_table_exists,
+    environment: process.env.NODE_ENV || 'production',
     google_keys: {
-      client_id: !!process.env.GOOGLE_CLIENT_ID || !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      client_id: !!process.env.GOOGLE_CLIENT_ID,
       client_secret: !!process.env.GOOGLE_CLIENT_SECRET
-    },
-    aws_keys: {
-      s3_bucket: !!process.env.AWS_S3_BUCKET_NAME,
-      access_key: !!process.env.AWS_ACCESS_KEY_ID
     }
   });
 });
