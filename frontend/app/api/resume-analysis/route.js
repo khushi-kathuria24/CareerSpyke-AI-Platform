@@ -109,24 +109,31 @@ Guidelines:
 - Keep it professional and empathetic.
 - Total word count for all text fields must be under 400 words.`;
     } else {
-      analysisPrompt = `You are an expert resume consultant. Analyze this resume document and provide comprehensive feedback in JSON format. Use clear paragraphs and Markdown for the summary and detailedFeedback fields.
+      analysisPrompt = `You are an expert resume consultant specializing in Fortune 500 placements. Provide a highly detailed and comprehensive analysis of this resume document. 
+Return ONLY a valid JSON object with the following structure:
 
 {
-  "score": <0-100>,
-  "atsScore": <0-100>,
-  "summary": "<A powerful, encouraging 2-sentence summary using Markdown bolding>",
-  "detailedFeedback": "<A comprehensive analysis in 4 short paragraphs using Markdown. Focus on: 1. Visual Layout, 2. Content Quality, 3. ATS & Keywords, 4. Achievement Impact. Use bullet points and bolding for key terms.>",
-  "suggestions": [<5-7 specific actionable improvements>],
-  "skills": [<top 10 identified skills>],
-  "strengths": [<top 3 key strengths>],
-  "gaps": [<top 3 critical gaps>],
-  "nextSteps": ["1. Fix [specific thing]...", "2. Add [specific skill]...", "3. Update [section]..."]
+  "score": <0-100 overall professional quality>,
+  "atsScore": <0-100 score for ATS compatibility and keyword density>,
+  "summary": "<A powerful, encouraging 2-sentence executive summary using Markdown bolding to highlight impact>",
+  "detailedFeedback": "<A comprehensive, long-form analysis in 5-6 paragraphs using Markdown. You MUST provide specific, deep insights into: 1. Visual Layout & Information Hierarchy, 2. Content Quality & Narrative Flow, 3. ATS Optimization & Strategic Keywords, 4. Achievement Impact & Quantification, 5. Section-specific improvements. Use bullet points and bolding for key terms. Each point should be 3-4 sentences long.>",
+  "suggestions": [<7-10 specific, actionable, and tactical improvements>],
+  "skills": [<top 12 identified skills, including hard and soft skills>],
+  "strengths": [<top 4 key strategic strengths>],
+  "gaps": [<top 4 critical gaps or missed opportunities>],
+  "nextSteps": [
+    "1. [Strategic Action] - Why and how to do it...",
+    "2. [Technical Fix] - Specific keywords or metrics to add...",
+    "3. [Formatting Change] - Specific layout adjustment...",
+    "4. [Content Polish] - Specific phrasing or section to rewrite...",
+    "5. [Strategic Goal] - Long-term career positioning advice..."
+  ]
 }
 
 Guidelines:
-- Keep it professional, detailed but concise.
-- Use bolding for important keywords.
-- Total word count for all text fields must be under 500 words.`;
+- Maintain a high-end, executive tone.
+- Ensure the detailedFeedback is substantial and highly specific.
+- Total word count for all text fields should be approximately 600-800 words for maximum value.`;
     }
 
     let result;
@@ -199,26 +206,34 @@ Guidelines:
         score: 78,
         atsScore: 74,
         summary: 'Analysis complete. Your resume shows strong potential with some tactical improvements suggested below for better reach.',
-        detailedFeedback: `1. **Visual Layout:** The resume has a clean structure, but could benefit from more white space between sections.
-2. **Content Quality:** Your experience is well-documented, but needs more quantifiable achievements.
-3. **ATS & Keywords:** Key industry terms are present, but could be better optimized for specific job roles.
-4. **Achievement Impact:** Focus on results-oriented bullet points starting with strong action verbs.`,
+        detailedFeedback: `1. **Visual Layout & Formatting Proficiency:** Your current structure is professionally sound but follows a slightly dated aesthetic. To compete in modern high-growth sectors, we recommend shifting towards a cleaner, more minimalist layout that utilizes strategic white space. This ensures recruiters can identify your core value proposition within the first 6 seconds of scanning.
+2. **Content Quality & Professional Narrative:** While your experience is well-documented, it currently reads as a list of tasks. We need to shift the narrative to focus on "Strategic Ownership." Instead of listing responsibilities, explain the specific problems you solved and the long-term value you created for your previous organizations.
+3. **ATS Optimization & Targeted Keywords:** Your resume contains general industry terms, but lacks the high-density skill clusters required by modern Applicant Tracking Systems (ATS). Our analysis suggests incorporating more specific technical competencies and "Action Verbs" like 'Spearheaded,' 'Modernized,' and 'Architected' to pass the initial automated filters.
+4. **Achievement Impact & Quantifiable Results:** This is a critical area for improvement. Your bullets are missing the "Data-Driven Hook." For every major role, you should provide at least three bullet points that include specific percentages, growth metrics, or budget figures (e.g., 'Reduced operational costs by 15% through strategic automation').
+5. **Information Hierarchy & Strategic Positioning:** Your most marketable skills are currently buried in the middle of the document. Modern resume strategy dictates that your most relevant expertise should be visible in the top third of the first page to ensure maximum retention and impact.
+6. **Executive Summary & Value Proposition:** Your introductory section is a bit generic. We recommend rewriting this as a 'Power Summary' that explicitly states your niche, your years of experience, and the unique 'unfair advantage' you bring to a new team.`,
         suggestions: [
-          'Add quantifiable metrics to your work experience (e.g., "Increased sales by 20%")',
-          'Include a professional summary section at the top of the resume',
-          'Optimize formatting for Applicant Tracking Systems (ATS)',
-          'Expand on technical skills with specific tools and platforms',
-          'Ensure consistent bullet point usage across all roles',
-          'Highlight soft skills through specific examples of leadership'
+          'Incorporate quantifiable metrics for every professional entry (e.g., "Scaled revenue by 30% YOY")',
+          'Implement a high-impact Professional Summary that highlights your niche rather than a generic objective',
+          'Optimize formatting for modern Applicant Tracking Systems (ATS) by removing complex tables or graphics',
+          'Expand on specialized technical skills by listing specific versions, platforms, and proprietary tools',
+          'Ensure consistent bullet point length and syntax throughout the document for visual harmony',
+          'Highlight leadership and soft skills through situational examples rather than just listing words',
+          'Condense the content to a high-impact, single-page format for maximum recruiter retention',
+          'Add a "Key Projects" section to showcase discrete wins outside of your standard job duties',
+          'Verify that all contact information and LinkedIn URL are clickable and up-to-date',
+          'Use a professional font like Inter, Montserrat, or Roboto for a modern digital-first feel'
         ],
-        skills: ['Project Management', 'Communication', 'Problem Solving', 'Team Leadership', 'Professional Writing'],
+        skills: ['Project Management', 'Communication', 'Problem Solving', 'Team Leadership', 'Professional Writing', 'Strategic Planning', 'Data-Driven Decision Making', 'Stakeholder Management'],
         nextSteps: [
-          'Fix dates and context for past roles to ensure clarity',
-          'Add more technical metrics to project descriptions',
-          'Update format to a concise single-page layout'
+          'Re-architect the work experience section to follow the STAR methodology (Situation, Task, Action, Result).',
+          'Perform a keyword audit against top job descriptions in your field and inject those terms into your skills section.',
+          'Format the layout for 100% ATS readability by using standard headings and avoiding multi-column designs.',
+          'Quantify at least three major achievements per role with specific metrics to demonstrate tangible value.',
+          'Rewrite your professional summary into a high-impact executive statement that defines your unique value.'
         ],
-        strengths: ['Clear formatting', 'Professional tone'],
-        gaps: ['Missing quantifiable results', 'Minimal ATS optimization']
+        strengths: ['Solid professional structure', 'Industry-relevant experience', 'Professional tone of voice', 'Consistent formatting'],
+        gaps: ['Minimal quantifiable impact', 'Lack of high-density SEO keywords', 'Weak achievement-to-task ratio', 'Under-utilized professional summary']
       },
       { status: 500 }
     );

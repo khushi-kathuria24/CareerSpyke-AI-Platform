@@ -43,23 +43,29 @@ export default function UploadResume() {
         score: 78,
         atsScore: 74,
         summary: 'Analysis complete. Your resume shows strong potential with some tactical improvements suggested below for better reach.',
-        detailedFeedback: `1. **Visual Layout:** The resume has a clean structure, but could benefit from more white space between sections.
-2. **Content Quality:** Your experience is well-documented, but needs more quantifiable achievements.
-3. **ATS & Keywords:** Key industry terms are present, but could be better optimized for specific job roles.
-4. **Achievement Impact:** Focus on results-oriented bullet points starting with strong action verbs.`,
+        detailedFeedback: `1. **Visual Layout & Formatting:** The current structure is professional but slightly dense. Consider increasing line spacing and margin between sections to improve the "first-glance" readability for recruiters.
+2. **Content Quality & Engagement:** Your experience entries are well-written, but they currently read like job descriptions rather than achievement logs. Focus on "What I accomplished" instead of "What I was responsible for."
+3. **ATS Optimization & Keywords:** You have a solid core of industry terms, but our analysis shows a lack of "Action Keywords" that modern ATS systems prioritize. Try incorporating verbs like "Orchestrated," "Pioneered," and "Transformed."
+4. **Achievement Impact & Metrics:** This is the most critical area for growth. Only about 20% of your bullet points contain numbers. Aim for 70%—include percentages, dollar amounts, or time-saved metrics for every role.
+5. **Section Hierarchy:** Your skills section is tucked away. Moving it closer to the top will help recruiters immediately see your technical stack without hunting for it.
+6. **Professional Summary:** Your summary is a bit generic. It needs to be a "hook" that specifies your niche expertise and what problem you solve for a potential employer immediately.`,
         suggestions: [
           'Add quantifiable metrics to your work experience (e.g., "Increased sales by 20%")',
           'Include a professional summary section at the top of the resume',
           'Optimize formatting for Applicant Tracking Systems (ATS)',
           'Expand on technical skills with specific tools and platforms',
           'Ensure consistent bullet point usage across all roles',
-          'Highlight soft skills through specific examples of leadership'
+          'Highlight soft skills through specific examples of leadership',
+          'Ensure the resume is exactly one page for maximum impact',
+          'Add a section for certifications or professional development'
         ],
-        skills: ['Project Management', 'Communication', 'Problem Solving', 'Team Leadership', 'Professional Writing'],
+        skills: ['Project Management', 'Communication', 'Problem Solving', 'Team Leadership', 'Professional Writing', 'Data Analysis', 'Strategic Planning'],
         nextSteps: [
-          'Fix dates and context for past roles to ensure clarity',
-          'Add more technical metrics to project descriptions',
-          'Update format to a concise single-page layout'
+          'Refactor the work experience section to lead with results rather than tasks.',
+          'Inject high-impact industry keywords into the top 1/3rd of the document for ATS.',
+          'Condense the layout to a modern one-page format to ensure total readability.',
+          'Standardize dates and location formatting for a polished, professional look.',
+          'Customize the professional summary to specifically target the role you are applying for today.'
         ],
         strengths: ['Clear formatting', 'Professional tone'],
         gaps: ['Missing quantifiable results', 'Minimal ATS optimization']
