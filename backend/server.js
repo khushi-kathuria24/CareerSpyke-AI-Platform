@@ -21,7 +21,7 @@ const initializeDatabase = () => {
     try {
       const schemaPath = path.join(__dirname, 'schema.sql');
       const schema = fs.readFileSync(schemaPath, 'utf8');
-      
+
       // Execute all SQL statements
       db.exec(schema, (err) => {
         if (err) {
@@ -52,6 +52,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const profileRoutes = require('./routes/profile');
 const communityRoutes = require('./routes/community');
 const interviewRoutes = require('./routes/interview');
+const awsRoutes = require('./routes/aws');
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -60,6 +61,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/interview', interviewRoutes);
+app.use('/api/aws', awsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
