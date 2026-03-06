@@ -1,3 +1,4 @@
+"use client"
 import { useState, useEffect } from 'react'
 import ResumePreview from '../../components/ResumePreview'
 import { XMarkIcon } from '@heroicons/react/24/outline'
