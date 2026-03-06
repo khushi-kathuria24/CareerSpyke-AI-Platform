@@ -1,7 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-
 // Evaluation criteria for different personas
 const evaluationCriteria = {
   HR: {
@@ -22,6 +20,16 @@ const evaluationCriteria = {
 };
 
 export async function POST(req) {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+  if (!apiKey) {
+    return new Response(JSON.stringify({
+      error: 'GEMINI_API_KEY is missing. Please add it to your environment variables.'
+    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+
   try {
     const body = await req.json().catch(() => ({}));
     const {

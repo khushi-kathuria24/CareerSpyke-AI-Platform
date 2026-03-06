@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import ChatBox from '@/components/ChatBox'
 
-export default function MockInterview(){
+export default function MockInterview() {
   const [persona, setPersona] = useState('HR')
   const [interviewMode, setInterviewMode] = useState('textual') // 'textual' or 'ai'
   const [response, setResponse] = useState('')
@@ -17,7 +17,7 @@ export default function MockInterview(){
   const [speechText, setSpeechText] = useState('')
   const [conversationHistory, setConversationHistory] = useState([])
   const [showSummaryPopup, setShowSummaryPopup] = useState(false)
-  
+
   // Refs for camera and speech recognition
   const videoRef = useRef(null)
   const streamRef = useRef(null)
@@ -59,14 +59,14 @@ export default function MockInterview(){
 
   const currentQuestion = questionsByRound[persona][currentQuestionIndex]
 
-  async function runInterview(){
+  async function runInterview() {
     if (!response.trim()) return
     setLoading(true)
     try {
-      const res = await axios.post('/api/mock-interview', { 
-        answer: response, 
+      const res = await axios.post('/api/mock-interview', {
+        answer: response,
         persona,
-        question: currentQuestion 
+        question: currentQuestion
       })
       setTranscript(res.data)
       setConversationHistory(prev => [
@@ -75,7 +75,7 @@ export default function MockInterview(){
         { type: 'answer', text: response },
         { type: 'feedback', data: res.data }
       ])
-    } catch(e){
+    } catch (e) {
       console.error(e)
       setTranscript({
         score: 0,
@@ -98,34 +98,53 @@ export default function MockInterview(){
   }
 
   const captureVideoFrame = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && videoRef.current.videoWidth > 0) {
       const ctx = canvasRef.current.getContext('2d')
-      canvasRef.current.width = videoRef.current.videoWidth
-      canvasRef.current.height = videoRef.current.videoHeight
-      ctx.drawImage(videoRef.current, 0, 0)
-      return canvasRef.current.toDataURL('image/jpeg')
+
+      // Resizing logic for faster AI analysis
+      const maxDim = 640;
+      let width = videoRef.current.videoWidth;
+      let height = videoRef.current.videoHeight;
+
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
+      ctx.drawImage(videoRef.current, 0, 0, width, height);
+      return canvasRef.current.toDataURL('image/jpeg', 0.8);
     }
     return null
   }
 
   const submitLiveInterview = async () => {
-    if (!speechText.trim()) {
-      alert('Please provide your answer through voice or text')
+    if (!speechText.trim() || speechText === 'Listening...') {
+      alert('Please provide your answer. Say something or type it in.')
       return
     }
-    
+
     setLoading(true)
     try {
       const videoFrame = captureVideoFrame()
-      
+      console.log('Capturing frame, size:', videoFrame ? videoFrame.length : 0);
+
       const res = await axios.post('/api/live-interview-analysis', {
         voiceTranscript: speechText,
         videoFrame: videoFrame,
         persona,
         question: currentQuestion,
-        cameraAvailable: cameraPermission
+        cameraAvailable: !!videoFrame
       })
-      
+
       setTranscript(res.data)
       setConversationHistory(prev => [
         ...prev,
@@ -133,11 +152,12 @@ export default function MockInterview(){
         { type: 'answer', text: speechText },
         { type: 'feedback', data: res.data, hasVideo: !!videoFrame }
       ])
-      
+
       setSpeechText('')
-    } catch(e) {
-      console.error('Error submitting live interview:', e)
-      alert('Error analyzing interview. Please try again.')
+    } catch (e) {
+      console.error('Submission error details:', e.response?.data || e.message);
+      const errorMsg = e.response?.data?.error || e.message || 'unknown error';
+      alert(`Error analyzing interview: ${errorMsg}. Please try again.`);
     } finally {
       setLoading(false)
     }
@@ -149,16 +169,16 @@ export default function MockInterview(){
 
     // Request camera permission
     try {
-      const cameraStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+      const cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
           facingMode: 'user'
-        } 
+        }
       })
       setCameraPermission(true)
       camerGranted = true
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = cameraStream
         videoRef.current.onloadedmetadata = () => {
@@ -176,7 +196,7 @@ export default function MockInterview(){
       const micStream = await navigator.mediaDevices.getUserMedia({ audio: true })
       setMicPermission(true)
       micGranted = true
-      
+
       // Keep mic stream active for recording
       if (streamRef.current && streamRef.current.getVideoTracks().length > 0) {
         const audioTracks = micStream.getAudioTracks()
@@ -211,7 +231,7 @@ export default function MockInterview(){
         recognitionRef.current.onresult = (event) => {
           let finalTranscript = ''
           let interimTranscript = ''
-          
+
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript
             if (event.results[i].isFinal) {
@@ -220,7 +240,7 @@ export default function MockInterview(){
               interimTranscript += transcript
             }
           }
-          
+
           if (finalTranscript) {
             setSpeechText(prev => {
               const updated = (prev.replace(/Listening\.\.\./, '').trim() + ' ' + finalTranscript.trim()).trim()
@@ -280,16 +300,19 @@ export default function MockInterview(){
 
   // Ensure video plays when it becomes available
   useEffect(() => {
-    if (videoRef.current && cameraPermission) {
+    if (videoRef.current && streamRef.current && cameraPermission) {
+      if (videoRef.current.srcObject !== streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+      }
       videoRef.current.play().catch(e => {
         console.error('Error auto-playing video:', e)
       })
     }
-  }, [cameraPermission])
+  }, [cameraPermission, interviewMode])
 
   // Close permission dialog and show camera when both permissions are checked
   useEffect(() => {
-    if (showPermissionDialog && (cameraPermission !== null || micPermission !== null)) {
+    if (showPermissionDialog && (cameraPermission === true || micPermission === true)) {
       setShowPermissionDialog(false)
     }
   }, [cameraPermission, micPermission, showPermissionDialog])
@@ -354,11 +377,10 @@ export default function MockInterview(){
                     <button
                       key={p.id}
                       onClick={() => handlePersonaChange(p.id)}
-                      className={`w-full p-4 rounded-lg transition-all duration-300 text-left border-2 ${
-                        persona === p.id
-                          ? 'border-primary bg-blue-50'
-                          : 'border-blue-200 hover:border-blue-300'
-                      }`}
+                      className={`w-full p-4 rounded-lg transition-all duration-300 text-left border-2 ${persona === p.id
+                        ? 'border-primary bg-blue-50'
+                        : 'border-blue-200 hover:border-blue-300'
+                        }`}
                     >
                       <p className='font-semibold text-slate-800 text-sm'>{p.label}</p>
                       <p className='text-xs text-slate-600 mt-1'>{p.description}</p>
@@ -378,11 +400,10 @@ export default function MockInterview(){
                 <div className='flex gap-2 bg-slate-100 p-1 rounded-lg'>
                   <button
                     onClick={() => setInterviewMode('textual')}
-                    className={`px-4 py-2 rounded font-semibold text-sm transition-all ${
-                      interviewMode === 'textual'
-                        ? 'bg-white text-primary shadow'
-                        : 'text-slate-600 hover:text-slate-800'
-                    }`}
+                    className={`px-4 py-2 rounded font-semibold text-sm transition-all ${interviewMode === 'textual'
+                      ? 'bg-white text-primary shadow'
+                      : 'text-slate-600 hover:text-slate-800'
+                      }`}
                   >
                     Textual
                   </button>
@@ -391,11 +412,10 @@ export default function MockInterview(){
                       setInterviewMode('ai')
                       setShowPermissionDialog(true)
                     }}
-                    className={`px-4 py-2 rounded font-semibold text-sm transition-all ${
-                      interviewMode === 'ai'
-                        ? 'bg-white text-primary shadow'
-                        : 'text-slate-600 hover:text-slate-800'
-                    }`}
+                    className={`px-4 py-2 rounded font-semibold text-sm transition-all ${interviewMode === 'ai'
+                      ? 'bg-white text-primary shadow'
+                      : 'text-slate-600 hover:text-slate-800'
+                      }`}
                   >
                     Live AI Interview
                   </button>
@@ -417,11 +437,10 @@ export default function MockInterview(){
                       <p className='font-semibold text-slate-800'>🎥 Camera</p>
                       <p className='text-xs text-slate-600'>For video recording and posture feedback</p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                      cameraPermission === true ? 'bg-green-100 text-green-800' : 
-                      cameraPermission === false ? 'bg-red-100 text-red-800' : 
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${cameraPermission === true ? 'bg-green-100 text-green-800' :
+                      cameraPermission === false ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {cameraPermission === true ? '✓ Granted' : cameraPermission === false ? '✗ Denied' : 'Click to Request'}
                     </span>
                   </div>
@@ -431,11 +450,10 @@ export default function MockInterview(){
                       <p className='font-semibold text-slate-800'>🎙️ Microphone</p>
                       <p className='text-xs text-slate-600'>For audio recording and voice analysis</p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                      micPermission === true ? 'bg-green-100 text-green-800' : 
-                      micPermission === false ? 'bg-red-100 text-red-800' : 
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${micPermission === true ? 'bg-green-100 text-green-800' :
+                      micPermission === false ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {micPermission === true ? '✓ Granted' : micPermission === false ? '✗ Denied' : 'Click to Request'}
                     </span>
                   </div>
@@ -480,7 +498,7 @@ export default function MockInterview(){
                 {/* Response Input */}
                 <div className='mb-6'>
                   <label className='block text-sm font-semibold text-slate-700 mb-3'>Your Answer</label>
-                  <textarea 
+                  <textarea
                     value={response}
                     onChange={e => setResponse(e.target.value)}
                     rows={5}
@@ -490,7 +508,7 @@ export default function MockInterview(){
                   />
                   <div className='mt-2 flex justify-between items-center'>
                     <p className='text-xs text-slate-500'>{response.length} characters</p>
-                    <button 
+                    <button
                       onClick={runInterview}
                       disabled={loading || !response.trim()}
                       className='btn-primary px-6 py-2 rounded-lg font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed'
@@ -558,8 +576,8 @@ export default function MockInterview(){
                           <span className='text-slate-500 text-xs'>🎙️</span>
                           <div className='flex gap-1'>
                             <div className='w-1 h-3 bg-red-500 rounded-full animate-bounce'></div>
-                            <div className='w-1 h-3 bg-red-500 rounded-full animate-bounce' style={{animationDelay: '0.1s'}}></div>
-                            <div className='w-1 h-3 bg-red-500 rounded-full animate-bounce' style={{animationDelay: '0.2s'}}></div>
+                            <div className='w-1 h-3 bg-red-500 rounded-full animate-bounce' style={{ animationDelay: '0.1s' }}></div>
+                            <div className='w-1 h-3 bg-red-500 rounded-full animate-bounce' style={{ animationDelay: '0.2s' }}></div>
                           </div>
                         </div>
                       </div>
@@ -638,18 +656,18 @@ export default function MockInterview(){
                   <div className='flex items-end gap-6 mb-4'>
                     <div className='flex items-center'>
                       <div className='relative w-32 h-32'>
-                        <svg className='w-full h-full transform -rotate-90' style={{filter: 'drop-shadow(0 0 10px rgba(248,113,113,0.16))'}}>
-                          <circle cx='64' cy='64' r='56' fill='none' stroke='#e5e7eb' strokeWidth='4'/>
-                          <circle 
+                        <svg className='w-full h-full transform -rotate-90' style={{ filter: 'drop-shadow(0 0 10px rgba(248,113,113,0.16))' }}>
+                          <circle cx='64' cy='64' r='56' fill='none' stroke='#e5e7eb' strokeWidth='4' />
+                          <circle
                             cx='64' cy='64' r='56' fill='none' stroke='url(#gradient)' strokeWidth='4'
                             strokeDasharray={`${(transcript.score || 0) * 351.68 / 100} 351.68`}
                             strokeLinecap='round'
-                            style={{transition: 'stroke-dasharray 0.5s ease'}}
+                            style={{ transition: 'stroke-dasharray 0.5s ease' }}
                           />
                           <defs>
                             <linearGradient id='gradient' x1='0%' y1='0%' x2='100%' y2='100%'>
-                              <stop offset='0%' stopColor='#f87171'/>
-                              <stop offset='100%' stopColor='#ef4444'/>
+                              <stop offset='0%' stopColor='#f87171' />
+                              <stop offset='100%' stopColor='#ef4444' />
                             </linearGradient>
                           </defs>
                         </svg>
@@ -687,7 +705,7 @@ export default function MockInterview(){
                     <div className='bg-indigo-50 border border-indigo-200 rounded-lg p-4'>
                       <p className='text-slate-700 text-sm leading-relaxed'>{transcript.bodyLanguageFeedback}</p>
                     </div>
-                    
+
                     {/* Video Analysis Details */}
                     {transcript.videoAnalysis && (
                       <div className='mt-4 grid grid-cols-2 gap-3'>
@@ -803,13 +821,13 @@ export default function MockInterview(){
 
                 {/* Navigation Buttons */}
                 <div className='flex gap-3'>
-                  <button 
+                  <button
                     onClick={handleNextQuestion}
                     className='flex-1 btn-primary py-3 rounded-lg font-semibold flex items-center justify-center gap-2 animate-pulse-glow'
                   >
                     <span>{currentQuestionIndex < questionsByRound[persona].length - 1 ? '➡️ Next Question' : '🎉 Interview Complete'}</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setTranscript(null)
                       setSpeechText('')
@@ -837,18 +855,18 @@ export default function MockInterview(){
                   <div className='flex items-end gap-4 mb-4'>
                     <div className='flex items-center'>
                       <div className='relative w-24 h-24'>
-                        <svg className='w-full h-full transform -rotate-90' style={{filter: 'drop-shadow(0 0 10px rgba(248,113,113,0.16))'}}>
-                          <circle cx='48' cy='48' r='40' fill='none' stroke='#e5e7eb' strokeWidth='4'/>
-                          <circle 
+                        <svg className='w-full h-full transform -rotate-90' style={{ filter: 'drop-shadow(0 0 10px rgba(248,113,113,0.16))' }}>
+                          <circle cx='48' cy='48' r='40' fill='none' stroke='#e5e7eb' strokeWidth='4' />
+                          <circle
                             cx='48' cy='48' r='40' fill='none' stroke='url(#gradient)' strokeWidth='4'
                             strokeDasharray={`${(transcript.score || 0) * 251.2 / 100} 251.2`}
                             strokeLinecap='round'
-                            style={{transition: 'stroke-dasharray 0.5s ease'}}
+                            style={{ transition: 'stroke-dasharray 0.5s ease' }}
                           />
                           <defs>
                             <linearGradient id='gradient' x1='0%' y1='0%' x2='100%' y2='100%'>
-                              <stop offset='0%' stopColor='#f87171'/>
-                              <stop offset='100%' stopColor='#ef4444'/>
+                              <stop offset='0%' stopColor='#f87171' />
+                              <stop offset='100%' stopColor='#ef4444' />
                             </linearGradient>
                           </defs>
                         </svg>
@@ -951,7 +969,7 @@ export default function MockInterview(){
                 )}
 
                 {/* Next Action */}
-                <button 
+                <button
                   onClick={handleNextQuestion}
                   className='w-full btn-primary py-3 rounded-lg font-semibold flex items-center justify-center gap-2 animate-pulse-glow'
                 >
@@ -979,11 +997,10 @@ export default function MockInterview(){
               <div className='space-y-4 mb-6'>
                 {conversationHistory.length > 0 ? (
                   conversationHistory.map((item, idx) => (
-                    <div key={idx} className={`p-4 rounded-lg ${
-                      item.type === 'question' 
-                        ? 'bg-blue-50 border border-blue-200' 
-                        : 'bg-green-50 border border-green-200'
-                    }`}>
+                    <div key={idx} className={`p-4 rounded-lg ${item.type === 'question'
+                      ? 'bg-blue-50 border border-blue-200'
+                      : 'bg-green-50 border border-green-200'
+                      }`}>
                       <p className='text-xs font-semibold text-slate-600 mb-1'>
                         {item.type === 'question' ? '❓ Question' : '✅ Your Answer'}
                       </p>
