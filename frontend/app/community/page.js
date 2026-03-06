@@ -1,9 +1,12 @@
 "use client"
 import { useState } from 'react'
+import ResumePreview from '../../components/ResumePreview'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 
-export default function Community(){
+export default function Community() {
   const [tab, setTab] = useState('faqs')
   const [selectedForum, setSelectedForum] = useState('general')
+  const [selectedResume, setSelectedResume] = useState(null)
   const [newPost, setNewPost] = useState('')
   const [postImage, setPostImage] = useState(null)
   const [postImagePreview, setPostImagePreview] = useState(null)
@@ -13,44 +16,67 @@ export default function Community(){
   const [postReplyStates, setPostReplyStates] = useState({})
   const [posts, setPosts] = useState({
     general: [
-      { id: 1, author: 'Alex Kumar', role: 'Software Engineer', avatar: '👨‍💼', title: 'Tips for acing technical interviews', content: 'Practice DSA problems regularly and focus on problem-solving approach', likes: 234, comments: [
-        { author: 'Sarah Lee', role: 'Student', avatar: '👩‍💼', text: 'Great tips! I started practicing on LeetCode and it really helped.' },
-        { author: 'John Smith', role: 'Mentor', avatar: '👨‍💼', text: 'Also focus on explaining your thought process clearly during the interview.' }
-      ], timestamp: '2 days ago' },
-      { id: 2, author: 'Emma Wilson', role: 'Data Scientist', avatar: '👩‍💼', title: 'Best ML frameworks in 2025', content: 'PyTorch and TensorFlow are still leading. Also exploring newer frameworks...', likes: 189, comments: [
-        { author: 'Mike Chen', role: 'Student', avatar: '👨‍💼', text: 'Have you tried JAX? It\'s gaining popularity for research.' },
-        { author: 'Lisa Wong', role: 'AI Engineer', avatar: '👩‍💼', text: 'TensorFlow\'s ecosystem is unbeatable for production deployment.' }
-      ], timestamp: '1 day ago' },
+      {
+        id: 1, author: 'Alex Kumar', role: 'Software Engineer', avatar: '👨‍💼', title: 'Tips for acing technical interviews', content: 'Practice DSA problems regularly and focus on problem-solving approach', likes: 234, comments: [
+          { author: 'Sarah Lee', role: 'Student', avatar: '👩‍💼', text: 'Great tips! I started practicing on LeetCode and it really helped.' },
+          { author: 'John Smith', role: 'Mentor', avatar: '👨‍💼', text: 'Also focus on explaining your thought process clearly during the interview.' }
+        ], timestamp: '2 days ago'
+      },
+      {
+        id: 2, author: 'Emma Wilson', role: 'Data Scientist', avatar: '👩‍💼', title: 'Best ML frameworks in 2025', content: 'PyTorch and TensorFlow are still leading. Also exploring newer frameworks...', likes: 189, comments: [
+          { author: 'Mike Chen', role: 'Student', avatar: '👨‍💼', text: 'Have you tried JAX? It\'s gaining popularity for research.' },
+          { author: 'Lisa Wong', role: 'AI Engineer', avatar: '👩‍💼', text: 'TensorFlow\'s ecosystem is unbeatable for production deployment.' }
+        ], timestamp: '1 day ago'
+      },
     ],
     internships: [
-      { id: 1, author: 'John Doe', role: 'Full Stack Dev', avatar: '👨‍💼', title: 'Summer internship experiences', content: 'Share your internship journey and learnings with the community', likes: 156, comments: [
-        { author: 'Emma Davis', role: 'Student', avatar: '👩‍💼', text: 'My first internship was at a startup and it was amazing learning experience!' },
-        { author: 'Alex Kumar', role: 'HR', avatar: '👨‍💼', text: 'Internships are the best way to build practical skills and network.' }
-      ], timestamp: '3 days ago' },
-      { id: 2, author: 'Sarah Lee', role: 'Product Manager', avatar: '👩‍💼', title: 'How to prepare for PM internships?', content: 'What skills should I focus on for PM roles?', likes: 98, comments: [
-        { author: 'James Wilson', role: 'PM Mentor', avatar: '👨‍💼', text: 'Focus on product thinking, user research, and data analysis skills.' },
-        { author: 'Nina Patel', role: 'Student', avatar: '👩‍💼', text: 'I\'m doing a PM internship now and communication skills matter most!' }
-      ], timestamp: '5 days ago' },
+      {
+        id: 1, author: 'John Doe', role: 'Full Stack Dev', avatar: '👨‍💼', title: 'Summer internship experiences', content: 'Share your internship journey and learnings with the community', likes: 156, comments: [
+          { author: 'Emma Davis', role: 'Student', avatar: '👩‍💼', text: 'My first internship was at a startup and it was amazing learning experience!' },
+          { author: 'Alex Kumar', role: 'HR', avatar: '👨‍💼', text: 'Internships are the best way to build practical skills and network.' }
+        ], timestamp: '3 days ago'
+      },
+      {
+        id: 2, author: 'Sarah Lee', role: 'Product Manager', avatar: '👩‍💼', title: 'How to prepare for PM internships?', content: 'What skills should I focus on for PM roles?', likes: 98, comments: [
+          { author: 'James Wilson', role: 'PM Mentor', avatar: '👨‍💼', text: 'Focus on product thinking, user research, and data analysis skills.' },
+          { author: 'Nina Patel', role: 'Student', avatar: '👩‍💼', text: 'I\'m doing a PM internship now and communication skills matter most!' }
+        ], timestamp: '5 days ago'
+      },
     ],
     projects: [
-      { id: 1, author: 'Michael Chen', role: 'DevOps Engineer', avatar: '👨‍💼', title: 'Open source projects to contribute', content: 'Looking for beginner-friendly open source projects', likes: 212, comments: [
-        { author: 'Rachel Green', role: 'Developer', avatar: '👩‍💼', text: 'Check out Good First Issues label on GitHub. Great starting point!' },
-        { author: 'Tom Harris', role: 'Open Source Maintainer', avatar: '👨‍💼', text: 'Documentation improvements are always welcome and a good way to start.' }
-      ], timestamp: '1 week ago' },
-      { id: 2, author: 'Lisa Rodriguez', role: 'Frontend Dev', avatar: '👩‍💼', title: 'Building a portfolio project', content: 'How to choose the right project idea for your portfolio?', likes: 145, comments: [
-        { author: 'David Kim', role: 'Student', avatar: '👨‍💼', text: 'Build something you\'re passionate about - employers can tell!' },
-        { author: 'Sophie Turner', role: 'Tech Lead', avatar: '👩‍💼', text: 'Focus on solving a real problem rather than just following tutorials.' }
-      ], timestamp: '1 week ago' },
+      {
+        id: 1, author: 'Michael Chen', role: 'DevOps Engineer', avatar: '👨‍💼', title: 'Open source projects to contribute', content: 'Looking for beginner-friendly open source projects', likes: 212, comments: [
+          { author: 'Rachel Green', role: 'Developer', avatar: '👩‍💼', text: 'Check out Good First Issues label on GitHub. Great starting point!' },
+          { author: 'Tom Harris', role: 'Open Source Maintainer', avatar: '👨‍💼', text: 'Documentation improvements are always welcome and a good way to start.' }
+        ], timestamp: '1 week ago'
+      },
+      {
+        id: 2, author: 'Lisa Rodriguez', role: 'Frontend Dev', avatar: '👩‍💼', title: 'Building a portfolio project', content: 'How to choose the right project idea for your portfolio?', likes: 145, comments: [
+          { author: 'David Kim', role: 'Student', avatar: '👨‍💼', text: 'Build something you\'re passionate about - employers can tell!' },
+          { author: 'Sophie Turner', role: 'Tech Lead', avatar: '👩‍💼', text: 'Focus on solving a real problem rather than just following tutorials.' }
+        ], timestamp: '1 week ago'
+      },
     ],
     resources: [
-      { id: 1, author: 'Alex Kumar', role: 'Software Engineer', avatar: '👨‍💼', title: 'Free learning resources compilation', content: 'Curated list of free courses and resources for all skills', likes: 423, comments: [
-        { author: 'Maya Verma', role: 'Student', avatar: '👩‍💼', text: 'This list is amazing! Saved me so much money on courses.' },
-        { author: 'Chris Johnson', role: 'Educator', avatar: '👨‍💼', text: 'MIT OpenCourseWare and freeCodeCamp are my go-to recommendations.' }
-      ], timestamp: '2 weeks ago' },
-      { id: 2, author: 'Emma Wilson', role: 'Data Scientist', avatar: '👩‍💼', title: 'Best coding practice platforms', content: 'LeetCode, HackerRank, CodeChef comparison guide', likes: 267, comments: [
-        { author: 'Oliver Rodriguez', role: 'Competitive Programmer', avatar: '👨‍💼', text: 'I prefer CodeChef for its community. Great problems!' },
-        { author: 'Jessica Lee', role: 'Interviewer', avatar: '👩‍💼', text: 'LeetCode premium is worth it for interview prep.' }
-      ], timestamp: '1 week ago' },
+      {
+        id: 1, author: 'Alex Kumar', role: 'Software Engineer', avatar: '👨‍💼', title: 'Free learning resources compilation', content: 'Curated list of free courses and resources for all skills', likes: 423, comments: [
+          { author: 'Maya Verma', role: 'Student', avatar: '👩‍💼', text: 'This list is amazing! Saved me so much money on courses.' },
+          { author: 'Chris Johnson', role: 'Educator', avatar: '👩‍💼', text: 'MIT OpenCourseWare and freeCodeCamp are my go-to recommendations.' }
+        ], timestamp: '2 days ago'
+      },
+      {
+        id: 2, author: 'Emma Wilson', role: 'Data Scientist', avatar: '👩‍💼', title: 'Best coding practice platforms', content: 'LeetCode, HackerRank, CodeChef comparison guide', likes: 267, comments: [
+          { author: 'Oliver Rodriguez', role: 'Competitive Programmer', avatar: '👨‍💼', text: 'I prefer CodeChef for its community. Great problems!' },
+          { author: 'Jessica Lee', role: 'Interviewer', avatar: '👩‍💼', text: 'LeetCode premium is worth it for interview prep.' }
+        ], timestamp: '4 days ago'
+      },
+      {
+        id: 3, author: 'Saurabh Singh', role: 'Cloud Architect', avatar: '☁️', title: 'AWS Certification Path for 2025', content: 'Here is how I cleared AWS Solutions Architect in 3 months with free resources only.', likes: 512, comments: [
+          { author: 'Vikram Rao', role: 'Student', avatar: '👨‍💻', text: 'Could you share the specific labs you used?' },
+          { author: 'Anjali Sharma', role: 'DevOps Intern', avatar: '👩‍💻', text: 'Cant believe you did it in 3 months! Super inspiring.' }
+        ], timestamp: '1 day ago'
+      },
+      { id: 4, author: 'Priya Verma', role: 'Frontend Lead', avatar: '🎨', title: 'Mastering CSS Grid & Flexbox', content: 'Stop using Bootstrap for everything. Learn layout basics for better career growth.', likes: 345, comments: [], timestamp: '5 hours ago' },
     ],
   })
   const [postLikes, setPostLikes] = useState({})
@@ -69,12 +95,78 @@ export default function Community(){
   ]
 
   const resumes = [
-    { id: 1, name: 'John Doe', role: 'Full Stack Dev', rating: 4.8 },
-    { id: 2, name: 'Jane Smith', role: 'Data Analyst', rating: 4.6 },
-    { id: 3, name: 'Mike Johnson', role: 'DevOps Engineer', rating: 4.9 },
-    { id: 4, name: 'Sarah Lee', role: 'Product Manager', rating: 4.7 },
-    { id: 5, name: 'Alex Chen', role: 'ML Engineer', rating: 4.8 },
-    { id: 6, name: 'Emma Wilson', role: 'UX Designer', rating: 4.5 },
+    {
+      id: 1,
+      name: 'John Doe',
+      role: 'Full Stack Developer',
+      rating: 4.8,
+      atsScore: 85,
+      skills: ['React', 'Node.js', 'MongoDB', 'AWS', 'Docker', 'TypeScript', 'GraphQL'],
+      summary: 'Experienced Full Stack Developer with 5+ years of building scalable web applications. Proven track record of optimizing performance and leading development teams.',
+      gaps: ['Could add more focus on mobile responsiveness', 'Missing recent certifications in cloud architecture'],
+      strengths: ['Strong technical depth', 'Excellent architectural planning'],
+      score: 88
+    },
+    {
+      id: 2,
+      name: 'Jane Smith',
+      role: 'Data Analyst',
+      rating: 4.6,
+      atsScore: 82,
+      skills: ['Python', 'SQL', 'Tableau', 'Pandas', 'PowerBI', 'Statistics', 'R'],
+      summary: 'Detail-oriented Data Analyst specialized in transforming complex datasets into actionable business insights. Highly proficient in statistical modeling and visualization.',
+      gaps: ['Could incorporate more machine learning project examples', 'Needs more focus on big data tools like Spark'],
+      strengths: ['Advanced visualization skills', 'Strong statistical foundation'],
+      score: 84
+    },
+    {
+      id: 3,
+      name: 'Mike Johnson',
+      role: 'DevOps Engineer',
+      rating: 4.9,
+      atsScore: 91,
+      skills: ['Kubernetes', 'Jenkins', 'Terraform', 'Ansible', 'Linux', 'Go', 'GCP'],
+      summary: 'DevOps professional focused on automating CI/CD pipelines and managing cloud infrastructure at scale. Expert in Infrastructure as Code (IaC) and containerization.',
+      gaps: ['Could highlight more security-focussed DevOps (DevSecOps) practices', 'Expand on monitoring tools like Prometheus/Grafana'],
+      strengths: ['High automation proficiency', 'Expertise in cloud-native tools'],
+      score: 93
+    },
+    {
+      id: 4,
+      name: 'Sarah Lee',
+      role: 'Product Manager',
+      rating: 4.7,
+      atsScore: 88,
+      skills: ['Product Strategy', 'Agile', 'User Research', 'A/B Testing', 'Roadmap Planning', 'Jira'],
+      summary: 'Strategic Product Manager with a strong user-centric approach. Expert in translating user needs into technical requirements and leading cross-functional teams to launch successful products.',
+      gaps: ['Provide more metrics on product-market fit', 'Focus more on technical documentation and PRDs'],
+      strengths: ['Excellent stakeholder communication', 'Data-driven decision making'],
+      score: 89
+    },
+    {
+      id: 5,
+      name: 'Alex Chen',
+      role: 'ML Engineer',
+      rating: 4.8,
+      atsScore: 87,
+      skills: ['PyTorch', 'Scikit-Learn', 'Natural Language Processing', 'Computer Vision', 'MLOps', 'C++'],
+      summary: 'Machine Learning Engineer focused on developing and deploying production-grade AI models. Experienced in NLP, neural networks, and optimizing inference speeds.',
+      gaps: ['Could add more details on model deployment pipelines', 'Describe data cleaning strategies more thoroughly'],
+      strengths: ['Cutting-edge research knowledge', 'Strong mathematical background'],
+      score: 90
+    },
+    {
+      id: 6,
+      name: 'Emma Wilson',
+      role: 'UX Designer',
+      rating: 4.5,
+      atsScore: 80,
+      skills: ['Figma', 'Adobe XD', 'Wireframing', 'Prototyping', 'User Testing', 'Design Systems', 'Micro-interactions'],
+      summary: 'Creative UX Designer with a passion for building accessible and beautiful user experiences. Expert in user-centered design and rapid prototyping.',
+      gaps: ['Should focus more on the "Why" behind design decisions', 'Expand on the case study results and ROI'],
+      strengths: ['Visual storytelling excellence', 'Deep understanding of accessibility'],
+      score: 82
+    },
   ]
 
   const handleImageUpload = (e) => {
@@ -196,14 +288,13 @@ export default function Community(){
             { id: 'gallery', label: '📚 Resumes Gallery', icon: '📄' },
             { id: 'posts', label: '📢 Posts', icon: '💭' }
           ].map(item => (
-            <button 
+            <button
               key={item.id}
               onClick={() => setTab(item.id)}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform ${
-                tab === item.id
-                  ? 'btn-primary text-white shadow-lg scale-105'
-                  : 'card-gradient text-slate-700 hover:shadow-md'
-              }`}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform ${tab === item.id
+                ? 'btn-primary text-white shadow-lg scale-105'
+                : 'card-gradient text-slate-700 hover:shadow-md'
+                }`}
             >
               <span className='mr-2'>{item.icon}</span>
               {item.label}
@@ -255,9 +346,9 @@ export default function Community(){
                                 <span className='text-sm text-indigo-600 font-bold'>{poll.votes[optIdx]} votes</span>
                               </div>
                               <div className='w-full bg-indigo-100 rounded-full h-2 overflow-hidden'>
-                                <div 
+                                <div
                                   className='bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-500'
-                                  style={{width: `${percentage}%`}}
+                                  style={{ width: `${percentage}%` }}
                                 ></div>
                               </div>
                             </div>
@@ -280,13 +371,13 @@ export default function Community(){
               <h2 className='text-2xl font-bold text-slate-800 mb-2'>📚 Resumes Gallery</h2>
               <p className='text-slate-600'>Explore and get inspired by other students\' resumes</p>
             </div>
-            
+
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {resumes.map((resume, idx) => (
-                <div 
+                <div
                   key={resume.id}
                   className='card-gradient rounded-2xl p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-slideInLeft border border-indigo-100 hover:border-indigo-300'
-                  style={{animationDelay: `${idx * 0.05}s`}}
+                  style={{ animationDelay: `${idx * 0.05}s` }}
                 >
                   <div className='flex items-start justify-between mb-4'>
                     <div>
@@ -301,7 +392,7 @@ export default function Community(){
 
                   <div className='flex items-center gap-1 mb-4'>
                     {[...Array(5)].map((_, i) => (
-                      <span 
+                      <span
                         key={i}
                         className={i < Math.round(resume.rating) ? 'text-yellow-400 text-lg' : 'text-gray-300 text-lg'}
                       >
@@ -311,7 +402,10 @@ export default function Community(){
                     <span className='text-sm text-slate-600 ml-2'>({resume.rating})</span>
                   </div>
 
-                  <button className='w-full btn-primary py-2 rounded-lg font-semibold text-sm transition-all duration-300'>
+                  <button
+                    onClick={() => setSelectedResume(resume)}
+                    className='w-full btn-primary py-2 rounded-lg font-semibold text-sm transition-all duration-300'
+                  >
                     View Resume
                   </button>
                 </div>
@@ -333,11 +427,10 @@ export default function Community(){
                       <button
                         key={forum.id}
                         onClick={() => setSelectedForum(forum.id)}
-                        className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${
-                          selectedForum === forum.id
-                            ? 'bg-indigo-500 text-white font-semibold'
-                            : 'hover:bg-indigo-50 text-slate-700'
-                        }`}
+                        className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${selectedForum === forum.id
+                          ? 'bg-indigo-500 text-white font-semibold'
+                          : 'hover:bg-indigo-50 text-slate-700'
+                          }`}
                       >
                         <div className='text-sm font-semibold'>{forum.name}</div>
                         <div className='text-xs opacity-75 mt-1'>{forum.description}</div>
@@ -359,13 +452,13 @@ export default function Community(){
                     className='w-full p-4 border-2 border-indigo-200 rounded-lg focus:border-indigo-500 focus:outline-none resize-none'
                     rows='4'
                   />
-                  
+
                   {/* Image Preview */}
                   {postImagePreview && (
                     <div className='mt-4 relative'>
-                      <img 
-                        src={postImagePreview} 
-                        alt='Preview' 
+                      <img
+                        src={postImagePreview}
+                        alt='Preview'
                         className='w-full h-40 object-cover rounded-lg'
                       />
                       <button
@@ -379,7 +472,7 @@ export default function Community(){
                       </button>
                     </div>
                   )}
-                  
+
                   {/* Image Upload and Post Button */}
                   <div className='mt-4 flex gap-3'>
                     <label className='flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-indigo-200 rounded-lg text-indigo-600 font-semibold cursor-pointer hover:bg-indigo-50 transition-all duration-300'>
@@ -432,9 +525,9 @@ export default function Community(){
                         <h4 className='font-bold text-slate-800 text-lg mb-2'>{post.title}</h4>
                         <p className='text-slate-700 text-sm line-clamp-3'>{post.content}</p>
                         {post.image && (
-                          <img 
-                            src={post.image} 
-                            alt='Post' 
+                          <img
+                            src={post.image}
+                            alt='Post'
                             className='w-full h-48 object-cover rounded-lg mt-3'
                           />
                         )}
@@ -444,23 +537,22 @@ export default function Community(){
                       <div className='flex items-center gap-6 pt-4 border-t border-indigo-200'>
                         <button
                           onClick={() => toggleLike(post.id, selectedForum)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                            postLikes[`${selectedForum}-${post.id}`]
-                              ? 'bg-red-100 text-red-600 font-semibold'
-                              : 'text-slate-600 hover:bg-indigo-50'
-                          }`}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${postLikes[`${selectedForum}-${post.id}`]
+                            ? 'bg-red-100 text-red-600 font-semibold'
+                            : 'text-slate-600 hover:bg-indigo-50'
+                            }`}
                         >
                           <span className='text-lg'>❤️</span>
                           <span className='text-sm font-semibold'>{post.likes} Likes</span>
                         </button>
-                        <button 
+                        <button
                           onClick={() => toggleComments(post.id, selectedForum)}
                           className='flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-indigo-50 transition-all duration-300'
                         >
                           <span className='text-lg'>💬</span>
                           <span className='text-sm font-semibold'>{post.comments.length} Comments</span>
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             setPostReplyStates(prev => ({
                               ...prev,
@@ -472,7 +564,7 @@ export default function Community(){
                           <span className='text-lg'>↩️</span>
                           <span className='text-sm font-semibold'>Reply</span>
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleShare(post.id, selectedForum)}
                           className='ml-auto px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-300 text-sm font-semibold relative'
                         >
@@ -618,6 +710,34 @@ export default function Community(){
           </div>
         )}
       </div>
+
+      {/* Resume Preview Modal */}
+      {selectedResume && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn'>
+          <div className='relative w-full max-w-4xl max-h-[90vh] overflow-y-auto card-gradient rounded-3xl p-2 shadow-2xl animate-scaleIn'>
+            <button
+              onClick={() => setSelectedResume(null)}
+              className='absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-red-50 text-slate-600 hover:text-red-500 transition-all z-10 shadow-sm'
+            >
+              <XMarkIcon className='w-6 h-6' />
+            </button>
+            <div className='p-2 md:p-6'>
+              <ResumePreview data={selectedResume} />
+            </div>
+            <div className='p-6 pt-0 flex justify-end gap-3'>
+              <button
+                onClick={() => setSelectedResume(null)}
+                className='px-6 py-2 rounded-xl font-semibold text-slate-600 hover:bg-slate-100 transition-all'
+              >
+                Close
+              </button>
+              <button className='btn-primary px-8 py-2 rounded-xl font-bold shadow-lg shadow-indigo-200'>
+                Use as Inspiration
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

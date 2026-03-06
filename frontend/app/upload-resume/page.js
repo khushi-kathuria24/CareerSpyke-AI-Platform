@@ -77,6 +77,42 @@ export default function UploadResume() {
     }
   }
 
+  const handleLoadDemo = () => {
+    setLoading(true)
+    setTimeout(() => {
+      const demoResult = {
+        fileName: 'demo_resume_full_stack.pdf',
+        score: 85,
+        atsScore: 82,
+        summary: 'Demo analysis successful. This **Full Stack Developer** resume shows advanced technical proficiency with React and Node.js.',
+        detailedFeedback: `1. **Visual Layout & Formatting Proficiency:** The layout is modern and clean, utilizing consistent margins and professional typography that enhances readability.
+2. **Content Quality & Professional Narrative:** Your experience reflects a high level of ownership. The use of "Designed," "Engineered," and "Orchestrated" creates a strong leadership narrative.
+3. **ATS Optimization & Targeted Keywords:** Excellent keyword density for cloud tools (AWS, Docker) and frontend frameworks. The resume is likely to rank in the top 5% for Senior Developer roles.
+4. **Achievement Impact & Quantifiable Results:** Good use of metrics (e.g., "Reduced latency by 40%"). To improve further, try to link every major project to a specific business outcome.
+5. **Information Hierarchy:** Perfectly structured with the Skills section at the top, allowing for immediate technical validation by recruiters.`,
+        suggestions: [
+          'Add more focus on security-first development practices (SecDevOps)',
+          'Include links to open-source contributions or personal portfolio',
+          'Expand on experience with Microservices architecture',
+          'Ensure the resume is exactly one page',
+          'Add a section for Mentorship or Leadership roles'
+        ],
+        skills: ['React', 'Node.js', 'PostgreSQL', 'AWS', 'Docker', 'Kubernetes', 'TypeScript', 'GraphQL'],
+        nextSteps: [
+          'Update the summary to highlight your recent experience with AI-integration.',
+          'Add a "Projects" section to showcase discrete wins outside of work.',
+          'Optimize the PDF metadata for better ATS indexing.',
+          'Quantify the impact of your team leadership roles more clearly.'
+        ],
+        strengths: ['Modern tech stack', 'Quantifiable results', 'Clean layout'],
+        gaps: ['Minimal open-source presence', 'Needs more cloud certification details']
+      }
+      setResult(demoResult)
+      setAnalysisDetails(demoResult)
+      setLoading(false)
+    }, 1500)
+  }
+
   const handleDrag = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -169,9 +205,16 @@ export default function UploadResume() {
                     <button
                       type='button'
                       onClick={() => fileInputRef.current?.click()}
-                      className='btn-primary px-6 py-2 rounded-lg font-semibold text-sm'
+                      className='btn-primary px-6 py-2 rounded-lg font-semibold text-sm mr-3'
                     >
                       Browse Files
+                    </button>
+                    <button
+                      type='button'
+                      onClick={handleLoadDemo}
+                      className='bg-slate-800 hover:bg-black text-white px-6 py-2 rounded-lg font-semibold text-sm transition-all'
+                    >
+                      Load Demo Resume
                     </button>
                     <p className='text-xs text-slate-500 mt-4'>PDF, DOC, DOCX, JPG, PNG, GIF, MP4, MOV • Max 20MB</p>
                   </div>
