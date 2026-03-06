@@ -33,24 +33,26 @@ Provide a comprehensive explanation in JSON format:
 
 Make it educational, clear, and practical. Include a working code example.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const result = await model.generateContent(systemPrompt);
-    const response = result.response;
-    const text = response.text();
+    const responseText = result.response.text();
 
     // Try to parse JSON from response
     let explanation;
     try {
-      // Remove markdown code blocks if present
-      const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      explanation = JSON.parse(cleanText);
+      // Find the first { and last } to strip any potential markdown or extra text
+      const jsonStart = responseText.indexOf('{');
+      const jsonEnd = responseText.lastIndexOf('}') + 1;
+      const cleanJSON = responseText.substring(jsonStart, jsonEnd);
+      explanation = JSON.parse(cleanJSON);
     } catch (parseError) {
-      // If JSON parsing fails, create structured response
+      console.error('Explanation parse error:', parseError, 'Raw:', responseText);
+      // Fallback structured response
       explanation = {
         title: concept,
         simple: `${concept} is a fundamental concept in ${category}.`,
-        detailed: text,
+        detailed: responseText, // Use raw responseText as detailed explanation
         analogy: `Understanding ${concept} is like learning a new skill - it takes practice and patience.`,
         useCases: [
           "Building scalable applications",
@@ -69,17 +71,17 @@ Make it educational, clear, and practical. Include a working code example.`;
     }
 
     return Response.json(
-      { 
+      {
         ...explanation,
-        success: true 
+        success: true
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Concept Explainer API Error:", error);
-    
+
     return Response.json(
-      { 
+      {
         error: "Failed to explain concept",
         details: error.message,
         success: false

@@ -58,8 +58,15 @@ export async function POST(req) {
     const isVideo = fileName.match(/\.(mp4|mov|avi|webm)$/);
     const isAudio = fileName.match(/\.(mp3|wav|m4a|ogg)$/);
 
-    // Use Gemini's vision capabilities to analyze the resume
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Get the vision model
+    let model;
+    try {
+      // Try to use the modern v1 path if SDK allows it, or stay standard
+      model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    } catch (e) {
+      console.warn("Falling back to gemini-pro due to initialization error:", e);
+      model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    }
 
     // Create context-specific analysis prompts
     let analysisPrompt;

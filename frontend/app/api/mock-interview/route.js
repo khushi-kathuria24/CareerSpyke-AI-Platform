@@ -66,28 +66,30 @@ Please evaluate this answer and respond with ONLY a valid JSON object (no markdo
 
 Ensure the response is valid JSON only.`;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
     const result = await model.generateContent(evaluationPrompt);
     const responseText = result.response.text();
 
     // Parse JSON response
     let evaluation;
     try {
-      // Remove markdown code blocks if present
-      const cleanResponse = responseText.replace(/```json\n?|\n?```/g, '').trim();
-      evaluation = JSON.parse(cleanResponse);
+      // Remove any non-JSON wrappers or extra text
+      const jsonStart = responseText.indexOf('{');
+      const jsonEnd = responseText.lastIndexOf('}') + 1;
+      const cleanJSON = responseText.substring(jsonStart, jsonEnd);
+      evaluation = JSON.parse(cleanJSON);
     } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      // Fallback response
+      console.error('JSON parse error, response was:', responseText);
+      // Fallback
       evaluation = {
-        score: 60 + Math.floor(Math.random() * 20),
+        score: 75,
         levelAssessment: 'Good',
-        highlights: ['Clear answer', 'Relevant experience mentioned'],
-        improvements: ['Add more specific examples', 'Include metrics or outcomes'],
-        refinedAnswer: `Enhanced answer: ${answer.substring(0, 100)}... [with more specific details and examples]`,
-        keyMissed: ['Quantifiable results', 'Learning from experience'],
-        communicationTips: ['Use storytelling structure', 'Speak at measured pace'],
-        nextSteps: ['Prepare examples with STAR method', 'Practice conciseness']
+        highlights: ['Strong response content', 'Professional tone'],
+        improvements: ['Could be more detailed', 'Add more metrics'],
+        refinedAnswer: answer,
+        keyMissed: ['Contextual details'],
+        communicationTips: ['Speak clearly'],
+        nextSteps: ['Practice more']
       };
     }
 

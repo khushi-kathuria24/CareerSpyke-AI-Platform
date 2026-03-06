@@ -100,7 +100,8 @@ Format your response as JSON with these exact keys:
   "videoAnalysis": ${cameraAvailable ? '{"confidence": <number>, "posture": "<string>", "eyeContact": "<string>", "overallPresence": "<string>"}' : 'null'}
 }`;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const modelName = cameraAvailable ? 'gemini-1.5-flash' : 'gemini-pro';
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     // If video is available, add it to the prompt with vision capabilities
     let generationConfig = {
@@ -111,18 +112,24 @@ Format your response as JSON with these exact keys:
 
     if (videoFrame && cameraAvailable) {
       // Prepare video frame for Gemini Vision API
-      const base64Data = videoFrame.split(',')[1];
-      contentParts = [
-        {
-          inlineData: {
-            mimeType: 'image/jpeg',
-            data: base64Data
+      try {
+        const base64Data = videoFrame.split(',')[1];
+        contentParts = [
+          {
+            inlineData: {
+              mimeType: 'image/jpeg',
+              data: base64Data
+            }
+          },
+          {
+            text: evaluationPrompt
           }
-        },
-        {
-          text: evaluationPrompt
-        }
-      ];
+        ];
+      } catch (err) {
+        console.error('Frame processing error:', err);
+        cameraAvailable = false;
+        contentParts = [{ text: evaluationPrompt }];
+      }
     } else {
       contentParts = [
         {

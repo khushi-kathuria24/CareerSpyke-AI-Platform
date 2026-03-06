@@ -36,7 +36,7 @@ Create 3 phases: Foundation, Intermediate, and Advanced.
 Include 4-5 milestone projects.
 Consider their current skills and suggest what they need to learn next.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const result = await model.generateContent(systemPrompt);
     const response = result.response;
@@ -83,17 +83,17 @@ Consider their current skills and suggest what they need to learn next.`;
     }
 
     return Response.json(
-      { 
+      {
         ...learningPath,
-        success: true 
+        success: true
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Learning Path API Error:", error);
-    
+
     return Response.json(
-      { 
+      {
         error: "Failed to generate learning path",
         details: error.message,
         success: false
