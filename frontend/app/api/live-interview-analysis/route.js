@@ -32,7 +32,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const {
+    let {
       voiceTranscript = '',
       videoFrame = null,
       question = '',
