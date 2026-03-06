@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 
-export default function LoginPage(){
+export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,8 +22,8 @@ export default function LoginPage(){
         })
         google.accounts.id.renderButton(
           document.getElementById('google-signin-button'),
-          { 
-            theme: 'outline', 
+          {
+            theme: 'outline',
             size: 'large',
             width: '100%',
             text: 'signin'
@@ -52,21 +52,24 @@ export default function LoginPage(){
     try {
       setLoading(true)
       setError('')
-      
+
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+      const googleSigninUrl = backendUrl ? `${backendUrl.replace(/\/$/, '')}/api/auth/google-signin` : '/api/auth/google-signin';
+
       // Send token to your backend
-      const res = await fetch('/api/auth/google-signin', {
+      const res = await fetch(googleSigninUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: response.credential })
       })
 
       if (!res.ok) throw new Error('Google sign-in failed')
-      
+
       const data = await res.json()
-      
+
       // Use auth context to save login
       login(data.token, data.user)
-      
+
       router.push('/')
     } catch (err) {
       setError(err.message || 'Failed to sign in with Google')
@@ -82,7 +85,12 @@ export default function LoginPage(){
       setLoading(true)
       setError('')
 
-      const res = await fetch('/api/auth/login', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+      const loginUrl = backendUrl ? `${backendUrl.replace(/\/$/, '')}/api/auth/login` : '/api/auth/login';
+
+      console.log('Attempting login via:', loginUrl);
+
+      const res = await fetch(loginUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -94,10 +102,10 @@ export default function LoginPage(){
       }
 
       const data = await res.json()
-      
+
       // Use auth context to save login
       login(data.token, data.user)
-      
+
       router.push('/')
     } catch (err) {
       setError(err.message || 'Failed to login')
@@ -140,7 +148,7 @@ export default function LoginPage(){
         <form onSubmit={handleEmailLogin} className='space-y-4'>
           <div>
             <label className='block text-sm font-medium text-slate-700 mb-2'>Email address</label>
-            <input 
+            <input
               className='w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-300 placeholder-slate-400'
               placeholder='Enter your email address'
               type='email'
@@ -152,7 +160,7 @@ export default function LoginPage(){
 
           <div>
             <label className='block text-sm font-medium text-slate-700 mb-2'>Password</label>
-            <input 
+            <input
               className='w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-300 placeholder-slate-400'
               placeholder='Enter your password'
               type='password'
@@ -162,7 +170,7 @@ export default function LoginPage(){
             />
           </div>
 
-          <button 
+          <button
             type='submit'
             disabled={loading}
             className='w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white py-3 rounded-lg font-semibold transition-all duration-300'

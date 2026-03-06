@@ -29,7 +29,10 @@ export default function RegisterPage() {
       setLoading(true)
       setError('')
 
-      const res = await fetch('/api/auth/register', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+      const registerUrl = backendUrl ? `${backendUrl.replace(/\/$/, '')}/api/auth/register` : '/api/auth/register';
+
+      const res = await fetch(registerUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
