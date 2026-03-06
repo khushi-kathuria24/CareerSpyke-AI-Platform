@@ -59,7 +59,7 @@ export async function POST(req) {
     const isAudio = fileName.match(/\.(mp3|wav|m4a|ogg)$/);
 
     // Use Gemini's vision capabilities to analyze the resume
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Create context-specific analysis prompts
     let analysisPrompt;

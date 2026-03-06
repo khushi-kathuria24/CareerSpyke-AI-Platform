@@ -92,7 +92,7 @@ Format your response as JSON with these exact keys:
   "videoAnalysis": ${cameraAvailable ? '{"confidence": <number>, "posture": "<string>", "eyeContact": "<string>", "overallPresence": "<string>"}' : 'null'}
 }`;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     // If video is available, add it to the prompt with vision capabilities
     let generationConfig = {
@@ -133,7 +133,7 @@ Format your response as JSON with these exact keys:
     });
 
     const responseText = result.response.text();
-    
+
     // Parse the JSON response from Gemini
     let feedback;
     try {

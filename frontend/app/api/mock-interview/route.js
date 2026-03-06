@@ -66,7 +66,7 @@ Please evaluate this answer and respond with ONLY a valid JSON object (no markdo
 
 Ensure the response is valid JSON only.`;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const result = await model.generateContent(evaluationPrompt);
     const responseText = result.response.text();
 
