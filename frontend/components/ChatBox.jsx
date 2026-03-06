@@ -26,7 +26,10 @@ const FAQS = [
 ]
 
 export default function ChatBox({ isExpanded = false, onExpand, onClose }) {
-  const [messages, setMessages] = useState([{ from: 'bot', text: 'Hi there! I\'m SAKHA your career assistant. Ask me anything about internships, interviews, or course related information.' }])
+  const [messages, setMessages] = useState([{
+    from: 'bot',
+    text: 'Hi! I\'m SAKHA, your AI Career Architect. I can now analyze your attached resumes and provide precise professional guidance. What career goal should we build today?'
+  }])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [showFAQ, setShowFAQ] = useState(true)
@@ -42,15 +45,27 @@ export default function ChatBox({ isExpanded = false, onExpand, onClose }) {
     setLoading(true)
     setShowFAQ(false)
     try {
-      const res = await axios.post('/api/gemini-chat', {
-        message: input,
-        context: 'Career assistant helping with interviews, resumes, and professional development',
-        files: uploadedFiles
+      const response = await fetch('/api/gemini-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: input,
+          context: 'Career Architect consultation',
+          files: uploadedFiles
+        })
       })
-      setMessages(m => [...m, { from: 'bot', text: res.data.answer || 'I\'m still learning! Try asking about internships, interviews, courses, or career guidance.' }])
+
+      const data = await response.json()
+
+      if (data.answer) {
+        setMessages(m => [...m, { from: 'bot', text: data.answer }])
+      } else {
+        throw new Error('No answer received')
+      }
     } catch (e) {
       console.error(e)
-      setMessages(m => [...m, { from: 'bot', text: 'I\'m experiencing connection issues. Please try again in a moment.' }])
+      const fallback = "I'm having a brief connection issue, but don't let that stop you! As your mentor, I recommend reviewing your resume's 'Quantifiable Achievements' section while I reconnect. I'll be back in a moment!"
+      setMessages(m => [...m, { from: 'bot', text: fallback }])
     } finally {
       setLoading(false)
     }

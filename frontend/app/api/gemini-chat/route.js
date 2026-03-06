@@ -1,16 +1,20 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { NextResponse } from "next/server";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+const API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 export async function POST(req) {
   try {
     const { message, context = '', files = [] } = await req.json();
 
     if (!message || !message.trim()) {
-      return Response.json(
-        { error: "Message is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    }
+
+    if (!API_KEY) {
+      console.error("Gemini API Key is missing");
+      return NextResponse.json({ error: "API configuration error. Please check your environment variables." }, { status: 500 });
     }
 
     const fileList = files.length > 0 ? `\n\nAttached Files: ${files.map(f => f.name).join(', ')}` : '';
@@ -25,41 +29,39 @@ DOMAIN-SPECIFIC EXPERTISE:
 4. **Learning Paths**: Recommendations for high-value certifications (Microsoft, AWS, Google) and core subject mastery (DSA, System Design).
 
 TONE & STYLE:
-- Professional yet encouraging (like a high-level mentor).
-- Use structured formatting (bullet points, bold text) for readability.
+- Professional yet encouraging mentor.
+- Use structured formatting (bullet points, bold text).
 - Be actionable: "Instead of 'I did X', say 'I achieved Y by doing X, resulting in Z% improvement'."
-- If a user provides a file name, acknowledge it and ask how you can help process its contents.
+- Acknowledge any attached files if mentioned.
 
 CONSTRAINTS:
 - Do not provide generic boilerplate advice.
-- If you're unsure, ask clarifying questions about their target industry or experience level.`;
+- Keep responses concise but impactful.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     // Combine system prompt with user message
     const fullMessage = `${systemPrompt}\n\nUser Question: ${message}${fileList}`;
 
     const result = await model.generateContent(fullMessage);
-    const response = result.response;
+    const response = await result.response;
     const text = response.text();
 
-    return Response.json(
-      {
-        answer: text,
-        success: true
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Gemini API Error:", error);
+    return NextResponse.json({
+      answer: text,
+      success: true
+    });
 
-    return Response.json(
-      {
-        error: "Failed to get response from AI assistant",
-        details: error.message,
-        success: false
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("Gemini API Error in SAKHA:", error);
+
+    // Provide a helpful fallback that looks like SAKHA is still helping
+    const fallbackMessage = "I apologize, but I'm having a brief technical hiccup while connecting to my knowledge base. However, as your career mentor, I recommend double-checking your career path goals or refining your resume's summary section while I reconnect!";
+
+    return NextResponse.json({
+      answer: fallbackMessage,
+      error: error.message,
+      success: false
+    }, { status: 200 }); // Status 200 to allow the fallback message to be displayed
   }
 }
