@@ -19,6 +19,12 @@ export default function UploadResume() {
   const [assistantInput, setAssistantInput] = useState('')
   const [assistantLoading, setAssistantLoading] = useState(false)
 
+  // Helper to clean markdown asterisks
+  const cleanText = (text) => {
+    if (!text) return ''
+    return text.replace(/\*\*/g, '')
+  }
+
   async function handleUpload(e) {
     e.preventDefault()
     if (!file) return alert('Select a file (PDF, DOCX, DOC, Image, or Video)')
@@ -299,7 +305,7 @@ export default function UploadResume() {
                   </div>
                   <h4 className='font-bold text-sm uppercase tracking-widest mb-2 opacity-80'>Quick AI Takeaway</h4>
                   <p className='text-lg md:text-xl font-medium leading-relaxed relative z-10'
-                    dangerouslySetInnerHTML={{ __html: result.summary.replace(/\*\*(.*?)\*\*/g, '<span class="font-extrabold text-yellow-300">$1</span>') }}>
+                    dangerouslySetInnerHTML={{ __html: cleanText(result.summary) }}>
                   </p>
                 </div>
               )}
@@ -348,7 +354,7 @@ export default function UploadResume() {
                       <div className='mt-1 p-1 bg-indigo-500 rounded-full group-hover:scale-110 transition-transform'>
                         <span className='text-white block w-4 h-4 flex items-center justify-center text-[10px] font-bold'>✓</span>
                       </div>
-                      <p className='text-slate-700 font-medium leading-snug'>{suggestion}</p>
+                      <p className='text-slate-700 font-medium leading-snug'>{cleanText(suggestion)}</p>
                     </div>
                   )) || (
                       <p className='text-slate-600'>Upload your resume to get personalized suggestions</p>
@@ -382,7 +388,7 @@ export default function UploadResume() {
                         <div className='flex flex-wrap gap-2'>
                           {result.skills.slice(0, 8).map((skill, idx) => (
                             <span key={idx} className='px-3 py-1 bg-purple-200 text-purple-800 rounded-full text-sm font-medium'>
-                              {skill}
+                              {cleanText(skill)}
                             </span>
                           ))}
                         </div>
@@ -404,7 +410,7 @@ export default function UploadResume() {
                       <div className='markdown-simple'>
                         {result.detailedFeedback.split('\n').map((line, i) => {
                           const isBullet = line.trim().startsWith('* ') || line.trim().startsWith('- ');
-                          const content = line.trim().replace(/^[\*\-] /, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                          const content = cleanText(line.trim().replace(/^[\*\-] /, '')); // Apply cleanText here
 
                           if (line.trim() === '') return <div key={i} className='h-4'></div>;
 
@@ -436,7 +442,7 @@ export default function UploadResume() {
                           <div className='w-10 h-10 rounded-xl bg-orange-500 text-white font-bold flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform'>
                             {idx + 1}
                           </div>
-                          <p className='text-slate-700 font-medium'>{step}</p>
+                          <p className='text-slate-700 font-medium'>{cleanText(step)}</p>
                         </div>
                       ))}
                     </div>
